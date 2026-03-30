@@ -18,9 +18,9 @@ export default function Footer() {
             <div style={{ fontSize: '0.8rem', fontWeight: '700', color: '#fff', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Links Úteis</div>
             <div style={{ fontSize: '0.78rem', lineHeight: 2 }}>
               <div><a href="https://www.pmvc.ba.gov.br" target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>Portal da Prefeitura</a></div>
-              <div><a href="https://www.pmvc.ba.gov.br/secretarias/infraestrutura" target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>Sec. de Infraestrutura Urbana</a></div>
+              <div><a href="https://www.pmvc.ba.gov.br/infraestrutura-urbana/" target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>SEINFRA — Sec. de Infraestrutura Urbana</a></div>
+              <div><a href="https://tudofacil.pmvc.ba.gov.br" target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>Tudo Fácil — Serviços Municipais</a></div>
               <div><a href="https://www.pmvc.ba.gov.br/ouvidoria" target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>Ouvidoria Municipal</a></div>
-              <div><a href="https://www.pmvc.ba.gov.br/alvara" target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>Consultar Alvará Online</a></div>
             </div>
           </div>
           <div>

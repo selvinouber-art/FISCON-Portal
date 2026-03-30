@@ -8,13 +8,17 @@ function parsePrazo(prazoStr) {
   } catch { return null }
 }
 
-export default function ContadorPrazo({ prazo, tipo = 'notif' }) {
+// Se defesa foi julgada (deferida ou indeferida), não mostra prazo
+export default function ContadorPrazo({ prazo, tipo = 'notif', defesa }) {
   const [agora, setAgora] = useState(new Date())
 
   useEffect(() => {
     const t = setInterval(() => setAgora(new Date()), 60000)
     return () => clearInterval(t)
   }, [])
+
+  // Não exibe se defesa já foi julgada ou processo encerrado
+  if (defesa?.status === 'deferida' || defesa?.status === 'indeferida') return null
 
   const dataLimite = parsePrazo(prazo)
   if (!dataLimite) return null

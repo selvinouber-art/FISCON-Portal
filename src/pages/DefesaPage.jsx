@@ -8,12 +8,27 @@ function gerarNumDefesa(registroNum) {
   return `${tipo}-${rand}/${ano}`
 }
 
+// Máscara CPF/CNPJ — detecta automaticamente pelo número de dígitos
+function mascaraCpfCnpj(valor) {
+  const n = valor.replace(/\D/g, '').slice(0, 14)
+  if (n.length <= 11) {
+    if (n.length <= 3) return n
+    if (n.length <= 6) return `${n.slice(0,3)}.${n.slice(3)}`
+    if (n.length <= 9) return `${n.slice(0,3)}.${n.slice(3,6)}.${n.slice(6)}`
+    return `${n.slice(0,3)}.${n.slice(3,6)}.${n.slice(6,9)}-${n.slice(9)}`
+  } else {
+    if (n.length <= 12) return `${n.slice(0,2)}.${n.slice(2,5)}.${n.slice(5,8)}/${n.slice(8)}`
+    return `${n.slice(0,2)}.${n.slice(2,5)}.${n.slice(5,8)}/${n.slice(8,12)}-${n.slice(12)}`
+  }
+}
+
 export default function DefesaPage({ registro, onEnviada, onVoltar }) {
   const [form, setForm] = useState({
-    nome: registro?.owner || '',
-    cpf:  registro?.cpf   || '',
-    email: '', telefone: '',
-    texto: '',
+    nome:     registro?.owner || '',
+    cpf:      registro?.cpf   || '',
+    email:    '',
+    telefone: '',
+    texto:    '',
   })
   const [anexos, setAnexos]         = useState([])
   const [enviando, setEnviando]     = useState(false)
@@ -23,6 +38,11 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
   function set(campo, valor) {
     setForm(f => ({ ...f, [campo]: valor }))
     setErros(e => ({ ...e, [campo]: '' }))
+  }
+
+  function handleCpf(e) {
+    const mascarado = mascaraCpfCnpj(e.target.value)
+    set('cpf', mascarado)
   }
 
   async function handleAnexo(e) {
@@ -45,15 +65,15 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
 
   function validar() {
     const e = {}
-    if (!form.nome.trim())            e.nome   = 'Nome obrigatório'
-    if (!form.cpf.trim())             e.cpf    = 'CPF obrigatório'
+    if (!form.nome.trim())             e.nome  = 'Nome obrigatório'
+    if (!form.cpf.trim())              e.cpf   = 'CPF ou CNPJ obrigatório'
     if (form.texto.trim().length < 30) e.texto = `Mínimo 30 caracteres (${form.texto.trim().length}/30)`
     setErros(e)
     return Object.keys(e).length === 0
   }
 
   async function handleEnviar() {
-    if (!validar()) { return }
+    if (!validar()) return
     setEnviando(true)
     try {
       const numDefesa = gerarNumDefesa(registro.num)
@@ -87,7 +107,6 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
     <div className="container">
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
 
-        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
           <button onClick={onVoltar} style={{ background: 'none', padding: '8px', borderRadius: '8px', border: '2px solid #E2E8F0', color: '#64748b', fontSize: '0.85rem', fontWeight: '600' }}>
             ← Voltar
@@ -100,7 +119,6 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
           </div>
         </div>
 
-        {/* Aviso prazo */}
         <div className={`alert ${ehAuto ? 'alert-red' : 'alert-amber'}`} style={{ marginBottom: '20px' }}>
           <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>⏰</span>
           <div style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>
@@ -119,8 +137,13 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
               <input value={form.nome} onChange={e => set('nome', e.target.value)} placeholder="Seu nome completo" />
             </Campo>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <Campo label="CPF *" erro={erros.cpf}>
-                <input value={form.cpf} onChange={e => set('cpf', e.target.value)} placeholder="000.000.000-00" />
+              <Campo label="CPF / CNPJ *" erro={erros.cpf}>
+                <input
+                  value={form.cpf}
+                  onChange={handleCpf}
+                  placeholder="000.000.000-00"
+                  inputMode="numeric"
+                />
               </Campo>
               <Campo label="Telefone">
                 <input value={form.telefone} onChange={e => set('telefone', e.target.value)} placeholder="(77) 99999-9999" />
@@ -151,7 +174,6 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
             <div style={{ fontSize: '0.75rem', color: chars < 30 ? '#B91C1C' : '#166534', fontWeight: '600' }}>
               {chars} caracteres {chars < 30 ? `(mínimo 30)` : '✓'}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Seja objetivo e claro</div>
           </div>
         </div>
 
@@ -161,7 +183,6 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
           <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '12px' }}>
             Anexe até 3 documentos: alvará, nota fiscal, foto, procuração ou qualquer comprovante relevante.
           </div>
-
           {anexos.length < 3 && (
             <label style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -174,9 +195,7 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
               <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={handleAnexo} style={{ display: 'none' }} disabled={uploadando} />
             </label>
           )}
-
           {erros.anexos && <div style={{ fontSize: '0.78rem', color: '#B91C1C', marginTop: '6px' }}>{erros.anexos}</div>}
-
           {anexos.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {anexos.map((a, i) => (
@@ -185,9 +204,7 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
                     <span>📎</span>
                     <span style={{ fontWeight: '600' }}>{a.nome}</span>
                   </div>
-                  <button onClick={() => setAnexos(anx => anx.filter((_, j) => j !== i))} style={{
-                    background: 'none', color: '#B91C1C', padding: '2px 6px', fontSize: '0.8rem', fontWeight: '700',
-                  }}>✕</button>
+                  <button onClick={() => setAnexos(anx => anx.filter((_, j) => j !== i))} style={{ background: 'none', color: '#B91C1C', padding: '2px 6px', fontSize: '0.8rem', fontWeight: '700' }}>✕</button>
                 </div>
               ))}
             </div>
@@ -196,8 +213,8 @@ export default function DefesaPage({ registro, onEnviada, onVoltar }) {
 
         {/* Declaração */}
         <div className="card" style={{ marginBottom: '20px' }}>
-          <div style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.7, padding: '4px 0' }}>
-            <strong style={{ color: '#001f5e' }}>Declaração:</strong> Ao enviar esta defesa, declaro que as informações prestadas são verdadeiras e que os documentos anexados são autênticos, assumindo as responsabilidades legais pelo seu conteúdo. Estou ciente de que a falsidade de informações pode acarretar sanções legais.
+          <div style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.7 }}>
+            <strong style={{ color: '#001f5e' }}>Declaração:</strong> Ao enviar esta defesa, declaro que as informações prestadas são verdadeiras e que os documentos anexados são autênticos, assumindo as responsabilidades legais pelo seu conteúdo. Os dados informados são tratados conforme a LGPD para fins de fiscalização municipal.
           </div>
         </div>
 

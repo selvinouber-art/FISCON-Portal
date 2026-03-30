@@ -1,10 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { registrarCiencia } from '../config/supabase.js'
 
 export default function CienciaPage({ registro, onConfirmar }) {
   const [confirmado, setConfirmado] = useState(false)
   const [salvando, setSalvando]     = useState(false)
   const ehAuto = registro?.type === 'auto'
+
+  // Se ciência já foi confirmada antes, pula direto
+  useEffect(() => {
+    if (registro?.ciencia_em) {
+      onConfirmar()
+    }
+  }, [registro])
 
   async function handleConfirmar() {
     setSalvando(true)
@@ -15,6 +22,16 @@ export default function CienciaPage({ registro, onConfirmar }) {
       setSalvando(false)
       onConfirmar()
     }
+  }
+
+  // Aguarda checagem inicial
+  if (registro?.ciencia_em) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '48px 0' }}>
+        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>⏳</div>
+        <div style={{ color: '#64748b' }}>Carregando processo...</div>
+      </div>
+    )
   }
 
   return (
@@ -36,11 +53,11 @@ export default function CienciaPage({ registro, onConfirmar }) {
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="secao-titulo">Documento Localizado</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <InfoItem label="Número" valor={registro?.num} />
-            <InfoItem label="Tipo" valor={ehAuto ? 'Auto de Infração' : 'Notificação Preliminar'} />
+            <InfoItem label="Número"          valor={registro?.num} />
+            <InfoItem label="Tipo"            valor={ehAuto ? 'Auto de Infração' : 'Notificação Preliminar'} />
             <InfoItem label="Data de Emissão" valor={registro?.date} />
-            <InfoItem label="Prazo" valor={registro?.prazo} />
-            <InfoItem label="Endereço" valor={`${registro?.addr}${registro?.bairro ? ` — ${registro?.bairro}` : ''}`} colSpan />
+            <InfoItem label="Prazo"           valor={registro?.prazo} />
+            <InfoItem label="Endereço" valor={`${registro?.addr || ''}${registro?.bairro ? ` — ${registro?.bairro}` : ''}`} colSpan />
           </div>
         </div>
 
@@ -88,7 +105,7 @@ export default function CienciaPage({ registro, onConfirmar }) {
               {confirmado && <span style={{ color: '#fff', fontSize: '14px', fontWeight: '700' }}>✓</span>}
             </div>
             <div style={{ fontSize: '0.88rem', color: '#374151', lineHeight: 1.5 }}>
-              Confirmo que recebi e tomei ciência do{ehAuto ? ' Auto de Infração' : 'a Notificação Preliminar'}{' '}
+              Confirmo que recebi e tomei ciência d{ehAuto ? 'o Auto de Infração' : 'a Notificação Preliminar'}{' '}
               <strong>{registro?.num}</strong>, emitido em {registro?.date}, compreendendo seus termos,
               prazos e obrigações legais.
             </div>
@@ -102,15 +119,14 @@ export default function CienciaPage({ registro, onConfirmar }) {
             style={{
               width: '100%', padding: '16px',
               background: confirmado ? '#001f5e' : '#cbd5e0',
-              color: '#fff', fontSize: '1rem', fontWeight: '700',
-              borderRadius: '12px',
+              color: '#fff', fontSize: '1rem', fontWeight: '700', borderRadius: '12px',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             }}
           >
             {salvando ? 'Registrando...' : '✅ Confirmar Ciência e Acessar Documento'}
           </button>
           <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
-            A confirmação registra data e hora de acesso. Este dado é armazenado com validade jurídica.
+            A confirmação registra data e hora de acesso com validade jurídica.
           </div>
         </div>
 
