@@ -5,7 +5,6 @@ import LinhaTempo from '../components/LinhaTempo.jsx'
 import DocumentoViewer from '../components/DocumentoViewer.jsx'
 import StatusDefesa from '../components/StatusDefesa.jsx'
 import GuiaOQueFazer from '../components/GuiaOQueFazer.jsx'
-import ChecklistRegularizacao from '../components/ChecklistRegularizacao.jsx'
 import FAQ from '../components/FAQ.jsx'
 
 export default function ProcessoPage({ registro, onDefesa, onProrrogacao }) {
@@ -199,11 +198,6 @@ export default function ProcessoPage({ registro, onDefesa, onProrrogacao }) {
             </div>
           </>
         )}
-
-        {/* Checklist */}
-        <div className="card" style={{ marginBottom: '20px' }}>
-          <ChecklistRegularizacao tipo={registro.type} gerencia={registro.gerencia} />
-        </div>
 
         {/* FAQ */}
         <div className="card" style={{ marginBottom: '20px' }}>
